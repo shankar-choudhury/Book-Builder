@@ -1,0 +1,7 @@
+package com.example.demo.user;
+
+public record UserDto(String username, String email) {
+    public static UserDto from(User user) {
+        return new UserDto(user.getUsername(), user.getEmail());
+    }
+}

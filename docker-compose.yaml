@@ -1,0 +1,41 @@
+services:
+  mysql:
+    image: mysql:9.5.0
+    container_name: myapp-mysql
+    env_file:
+      .env.sql
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-prootpassword"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  backend:
+    build:
+      context: ./demo
+      dockerfile: Dockerfile
+    container_name: myapp-backend
+    depends_on:
+      mysql:
+        condition: service_healthy
+    env_file:
+      .env
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./demo-frontend
+      dockerfile: Dockerfile
+    container_name: myapp-frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+
+volumes:
+  mysql_data:
