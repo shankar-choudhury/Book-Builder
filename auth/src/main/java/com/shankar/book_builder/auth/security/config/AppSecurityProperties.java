@@ -50,6 +50,17 @@ public class AppSecurityProperties {
         private Integer maxBuckets;
     }
 
+    @Getter
+    @Setter
+    public static class Redis {
+        @NotBlank
+        private String host;
+        @NotNull
+        private Integer port;
+        @NotNull
+        private String password;
+    }
+
     @Setter
     @Getter
     public static class Cookies {
