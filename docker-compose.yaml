@@ -16,7 +16,7 @@ services:
 
   backend:
     build:
-      context: ./demo
+      context: ./auth
       dockerfile: Dockerfile
     container_name: myapp-backend
     depends_on:
