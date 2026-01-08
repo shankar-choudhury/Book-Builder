@@ -1,4 +1,0 @@
-MYSQL_ROOT_PASSWORD=rootpassword
-MYSQL_DATABASE=myapp
-MYSQL_USER=myappuser
-MYSQL_PASSWORD=strongpassword
