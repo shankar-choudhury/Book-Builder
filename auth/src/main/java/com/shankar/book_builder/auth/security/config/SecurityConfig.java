@@ -2,8 +2,8 @@ package com.shankar.book_builder.auth.security.config;
 
 import com.shankar.book_builder.auth.security.CookieUtils;
 import com.shankar.book_builder.auth.security.jwt.JwtCookieAuthFilter;
-import com.shankar.book_builder.auth.security.ratelimiter.RateLimitingFilter;
-import com.shankar.book_builder.auth.security.ratelimiter.RequestCachingFilter;
+import com.shankar.book_builder.auth.security.ratelimiter.filter.RateLimitingFilter;
+import com.shankar.book_builder.auth.security.ratelimiter.filter.RequestCachingFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +18,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfFilter;
-import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -42,15 +41,13 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        CsrfTokenRequestAttributeHandler requestHandler = new XorCsrfTokenRequestAttributeHandler();
-
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                        .csrfTokenRequestHandler(requestHandler)
+                        .csrfTokenRequestHandler(new XorCsrfTokenRequestAttributeHandler())
                         .ignoringRequestMatchers(
                                 props.getAuthAllowPathPrefix() + "/register",
                                 props.getAuthAllowPathPrefix() + "/refresh")

@@ -1,12 +1,12 @@
 package com.shankar.book_builder.auth.security.ratelimiter.engine;
 
 import io.github.bucket4j.Bandwidth;
-import io.github.bucket4j.Bucket;
+import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.ConsumptionProbe;
+import io.github.bucket4j.distributed.proxy.ProxyManager;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 /**
  * <h3>Distributed Rate Limiting Migration Guide (Local Redis)</h3>
@@ -61,7 +61,11 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class Bucket4jRateLimitingEngine implements RateLimitingEngine {
 
-    private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
+    private final ProxyManager<String> proxyManager;
+
+    public Bucket4jRateLimitingEngine(ProxyManager<String> proxyManager) {
+        this.proxyManager = proxyManager;
+    }
 
     @Override
     public RateLimitingDecision evaluate(
@@ -71,12 +75,13 @@ public class Bucket4jRateLimitingEngine implements RateLimitingEngine {
     ) {
         String bucketKey = policy + ":" + key;
 
-        Bucket bucket = buckets.computeIfAbsent(
-                bucketKey,
-                k -> Bucket.builder().addLimit(bandwidth).build()
-        );
+        Supplier<BucketConfiguration> configSupplier = () -> BucketConfiguration.builder()
+                .addLimit(bandwidth)
+                .build();
 
-        ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
+        ConsumptionProbe probe = proxyManager.builder()
+                .build(bucketKey, configSupplier)
+                .tryConsumeAndReturnRemaining(1);
 
         if (probe.isConsumed()) {
             return new RateLimitingDecision.Allowed(probe.getRemainingTokens());
@@ -85,13 +90,5 @@ public class Bucket4jRateLimitingEngine implements RateLimitingEngine {
         long retryAfterSeconds = Math.max(1, probe.getNanosToWaitForRefill() / 1_000_000_000L);
 
         return new RateLimitingDecision.Rejected(retryAfterSeconds);
-    }
-
-    public void clearAll() {
-        buckets.clear();
-    }
-
-    public int bucketCount() {
-        return buckets.size();
     }
 }

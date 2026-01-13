@@ -23,6 +23,8 @@ public class AppSecurityProperties {
     private final Cookies cookies = new Cookies();
     @Valid
     private final RateLimiter rateLimiter = new RateLimiter();
+    @Valid
+    private final Redis redis = new Redis();
 
     @Setter
     @Getter

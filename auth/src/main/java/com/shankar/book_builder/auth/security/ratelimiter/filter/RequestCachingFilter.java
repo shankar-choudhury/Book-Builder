@@ -1,4 +1,4 @@
-package com.shankar.book_builder.auth.security.ratelimiter;
+package com.shankar.book_builder.auth.security.ratelimiter.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

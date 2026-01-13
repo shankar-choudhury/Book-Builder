@@ -1,4 +1,4 @@
-package com.shankar.book_builder.auth.security.ratelimiter;
+package com.shankar.book_builder.auth.security.ratelimiter.filter;
 
 import com.shankar.book_builder.auth.security.config.AppSecurityProperties;
 import com.shankar.book_builder.auth.security.ratelimiter.engine.Bucket4jRateLimitingEngine;
