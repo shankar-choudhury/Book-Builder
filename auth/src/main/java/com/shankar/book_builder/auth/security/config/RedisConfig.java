@@ -21,15 +21,20 @@ public class RedisConfig {
 
     @Bean(destroyMethod = "shutdown")
     public RedisClient redisClient(AppSecurityProperties props) {
-        return RedisClient.create(Optional.ofNullable(props.getRedis().getPassword())
+        return RedisClient.create(buildRedisUri(props.getRedis()));
+    }
+
+    private RedisURI buildRedisUri(AppSecurityProperties.Redis redis) {
+        RedisURI.Builder builder = RedisURI.builder()
+                .withHost(redis.getHost())
+                .withPort(redis.getPort())
+                .withTimeout(Duration.ofSeconds(5));
+
+        Optional.ofNullable(redis.getPassword())
                 .filter(pass -> !pass.isBlank())
-                .map(pass -> RedisURI.builder().withHost(props.getRedis().getHost())
-                        .withPort(props.getRedis().getPort())
-                        .withPassword(pass.toCharArray()))
-                .orElseGet(() -> RedisURI.builder().withHost(props.getRedis().getHost())
-                        .withPort(props.getRedis().getPort()))
-                .withTimeout(Duration.ofSeconds(5))
-                .build());
+                .ifPresent(pass -> builder.withPassword(pass.toCharArray()));
+
+        return builder.build();
     }
 
     @Bean(destroyMethod = "close")
